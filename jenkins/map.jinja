@@ -1,25 +1,27 @@
-{% set jenkins = salt['grains.filter_by']({
-    'default': {
-        'pkgs': ['jenkins'],
+{% import_yaml "jenkins/defaults.yaml" as default_settings %}
+
+{% set os_family_map = salt['grains.filter_by']({
+    'Arch': {
         'netcat_pkg': 'netcat-openbsd',
-        'user': 'jenkins',
-        'group': 'jenkins',
-        'nginx_user': 'www-data',
-        'nginx_group': 'www-data',
-        'home': '/var/lib/jenkins',
-        'port': '80',
-        'jenkins_port': 8080,
-        'server_name': None,
-        'cli_path': '/var/cache/jenkins/jenkins-cli.jar',
-        'master_url': 'http://localhost:8080',
-        'plugins': {
-            'updates_source': 'http://updates.jenkins-ci.org/update-center.json',
-            'installed': [],
-            'disabled': [],
-        },
-        'jobs': {
-            'installed': {},
-            'absent': []
-        }
     },
-}, merge=salt['pillar.get']('jenkins:lookup')) %}
+    'Debian': {
+        'netcat_pkg': 'netcat-openbsd',
+    },
+    'RedHat': {
+        'netcat_pkg': 'nc',
+    },
+    'Suse': {
+        'netcat_pkg': 'netcat-openbsd',
+    },
+  }, grain="os_family", merge=salt['pillar.get']('jenkins:lookup'))
+%}
+
+{% do default_settings.jenkins.update(os_family_map) %}
+
+{% set jenkins = salt['pillar.get'](
+    'jenkins',
+    default=default_settings.jenkins,
+    merge=True)
+%}
+
+
