@@ -1,28 +1,6 @@
 {% from "jenkins/map.jinja" import jenkins with context %}
 
-jenkins_group:
-  group.present:
-    - name: {{ jenkins.group }}
-    - system: True
-
-jenkins_user:
-  file.directory:
-    - name: {{ jenkins.home }}
-    - user: {{ jenkins.user }}
-    - group: {{ jenkins.group }}
-    - mode: 0755
-    - require:
-      - user: jenkins_user
-      - group: jenkins_group
-  user.present:
-    - name: {{ jenkins.user }}
-    - groups:
-      - {{ jenkins.group }}
-    - system: True
-    - home: {{ jenkins.home }}
-    - shell: /bin/bash
-    - require:
-      - group: jenkins_group
+## if the user isn't defined in the users formula, this will fail
 
 jenkins:
   {% if grains['os_family'] in ['RedHat', 'Debian'] %}
@@ -38,6 +16,9 @@ jenkins:
     - require_in:
       - pkg: jenkins
   {% endif %}
+    - require:
+      - user: users_{{ jenkins.user }}_user
+      - group: users_{{ jenkins.user }}_user
   pkg.installed:
     - pkgs: {{ jenkins.pkgs|json }}
   service.running:
