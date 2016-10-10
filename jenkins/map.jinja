@@ -1,8 +1,28 @@
-{% import_yaml "jenkins/defaults.yaml" as default_settings %}
-
-{% set os_family_map = salt['grains.filter_by']({
-    'Arch': {
+{% set jenkins = salt['grains.filter_by']({
+    'default': {
+        'pkgs': ['jenkins'],
+        'deb_apt_source': '/etc/apt/sources.list.d/jenkins-ci.list',
         'netcat_pkg': 'netcat-openbsd',
+        'user': 'jenkins',
+        'group': 'jenkins',
+        'nginx_user': 'www-data',
+        'nginx_group': 'www-data',
+        'home': '/var/lib/jenkins',
+        'port': '80',
+        'jenkins_port': 8080,
+        'server_name': None,
+        'cli_path': '/var/cache/jenkins/jenkins-cli.jar',
+        'master_url': 'http://localhost:8080',
+        'plugins': {
+            'updates_source': 'http://updates.jenkins-ci.org/update-center.json',
+            'installed': [],
+            'disabled': [],
+        },
+        'jobs': {
+            'installed': {},
+            'absent': []
+        },
+        'stable': False
     },
     'Debian': {
         'netcat_pkg': 'netcat-openbsd',
